@@ -10,7 +10,7 @@ fn check_ansi_methods() {
     assert_eq!(a.text(),"\x1b[?1003h");
     a.clear();
     a.disable_mouse_events();
-    assert_eq!(a.text(),"\x1b[?1003l");
+    assert_eq!(a.text(),"\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l");
     a.clear();
     a.write_char('a');
     assert_eq!(a.text(),"a");

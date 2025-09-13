@@ -1,3 +1,4 @@
+use std::io::Write;
 use crate::graphics::{CharFlags, Color, Point, Surface};
 use EnumBitFlags::EnumBitFlags;
 
@@ -39,13 +40,15 @@ impl AnsiFormatter {
     pub(crate) fn write_string(&mut self, s: &str) {
         self.text.push_str(s);
     }
-    #[allow(dead_code)]
+
     pub(crate) fn enable_mouse_events(&mut self) {
-        self.text.push_str("\x1b[?1003h");
+        std::io::stdout().write_all(b"\x1b[?1000h\x1b[?1002h\x1b[?1003h\x1b[?1006h").unwrap();
+        std::io::stdout().flush().unwrap();
     }
-    #[allow(dead_code)]
+
     pub(crate) fn disable_mouse_events(&mut self) {
-        self.text.push_str("\x1b[?1003l");
+        std::io::stdout().write_all(b"\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l").unwrap();
+        std::io::stdout().flush().unwrap();
     }
     #[inline(always)]
     pub(crate) fn set_foreground_color(&mut self, color: Color) {

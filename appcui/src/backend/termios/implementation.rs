@@ -79,8 +79,6 @@ impl TermiosTerminal {
 
         t.ansi_buffer.clear();
         t.ansi_buffer.enable_mouse_events();
-        let _ = std::io::stdout().write_all(t.ansi_buffer.text().as_bytes());
-        let _ = std::io::stdout().flush();
 
         Input::new().start(sender.clone());
         SizeReader::new(get_resize_notification().clone()).start(sender);
@@ -96,13 +94,14 @@ impl Backend for TermiosTerminal {
         let _ = std::io::stdout().flush();
     }
 
+    fn on_resize(&mut self, new_size: Size) {
+        self.size = new_size;
+    }
+
     fn size(&self) -> Size {
         self.size
     }
 
-    fn query_system_event(&mut self) -> Option<SystemEvent> {
-        None
-    }
     fn clipboard_text(&self) -> Option<String> {
         let mut ctx: ClipboardContext = ClipboardContext::new().ok()?;
         ctx.get_contents().ok()
@@ -118,22 +117,17 @@ impl Backend for TermiosTerminal {
         ctx.get_contents().is_ok()
     }
 
-    fn on_resize(&mut self, new_size: Size) {
-        self.size = new_size;
-    }
-
-    fn on_close(&mut self) {
-        self.ansi_buffer.clear();
-        self.ansi_buffer.disable_mouse_events();
-        let _ = std::io::stdout().write_all(self.ansi_buffer.text().as_bytes());
-        let _ = std::io::stdout().flush();
-        self.orig_termios.restore();
+    fn query_system_event(&mut self) -> Option<SystemEvent> {
+        None
     }
 
     fn is_single_threaded(&self) -> bool {
         false
     }
-}
 
-#[derive(Debug, Default, PartialEq, Eq)]
-pub struct UnsupportedCode([u8; 5]);
+    fn on_close(&mut self) {
+        self.ansi_buffer.clear();
+        self.ansi_buffer.disable_mouse_events();
+        self.orig_termios.restore();
+    }
+}
